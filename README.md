@@ -2,6 +2,10 @@
 DiscordからPocketMine-MPのコンソールを操作します。
 
 ## download
+### release
+https://github.com/DaisukeDaisuke/pmmpDiscordBot/releases  
+
+### develop
 開発バージョンに関しましては、GitHub Actionsよりダウンロード可能にてございます。  
 The development version can be downloaded from GitHub Actions.
 https://github.com/DaisukeDaisuke/pmmpDiscordBot/actions
