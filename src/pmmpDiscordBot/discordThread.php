@@ -1,5 +1,5 @@
 <?php
-namespace discordbottest;
+namespace pmmpDiscordBot;
 
 use pocketmine\Server;
 use pocketmine\utils\TextFormat;

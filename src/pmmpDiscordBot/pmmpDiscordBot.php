@@ -48,6 +48,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 
         if($error === true){
             $this->getLogger()->info("§cこのプラグインを無効化致します。§r");
+            $this->getLogger()->info("[PocketMine-MP]/plugin_data/pmmpDiscordBot/token.yml ファイルの中身を編集していただきたいです...");
             $this->getServer()->getPluginManager()->disablePlugin($this);
             return;
         }
