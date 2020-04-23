@@ -16,8 +16,6 @@ jobs:
         uses: actions/checkout@v2
       - name: Syntax checking of php files
         run: find ./src -name "*.php" -type f | xargs -l -P 0 php -l -f
-      - name: Download DevTools
-        run: wget https://github.com/pmmp/DevTools/releases/download/1.14.0/DevTools.phar -O ~/DevTools.phar
       - name: Get Composer Cache Directory
         id: composer-cache
         run: |
