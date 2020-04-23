@@ -10,7 +10,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: "! contains(github.event.head_commit.message, '[ci skip]')"
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -34,9 +33,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev --prefer-dist --no-progress --no-suggest
       - name: Build source code
-        run: php -dphar.readonly=0 ~/DevTools.phar --make ./ --out ./out.phar
+        run: php -dphar.readonly=0 ./make-phar.php enableCompressAll
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
           name: PHAR
-          path: ./out.phar
+          path: ./pmmpDiscordBot.phar
