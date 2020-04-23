@@ -5,5 +5,5 @@ DiscordからPocketMine-MPのコンソールを操作します。
 ```
 git clone git@github.com:DaisukeDaisuke/pmmpDiscordBot.git
 cd pmmpDiscordBot
-composer require team-reflex/discord-php 
+composer install --no-dev --prefer-dist --no-progress --no-suggest
 ```
