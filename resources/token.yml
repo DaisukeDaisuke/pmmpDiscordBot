@@ -1,0 +1,19 @@
+---
+# discordにて生成致しました、botのtokenを記述致します。
+# 例: token: "2Tif+Yu4XoF4RMTx6_k2i8LU+WhxZ0poU!4qJhD+ARXnOep.rloQmgMVlxu2" (ランダム生成致しました、例にてございます...)
+token: "your-auth-token"
+
+# コンソール出力を実施致します、ギルドid、チェンネルidを指定致します。
+# ギルドid、チェンネルidに関しましては、コンソール出力を実施致したいチャンネルを表示致しました状態にて、検索ボックス付近にて、表示致しましております、urlより取得可能にてございます...
+# 例: https://discordapp.com/channels/000000000000000000/111111111111111111
+# send_guild_Id: "000000000000000000"
+# send_channel_Id: "111111111111111111"
+send_guildId: "your-guild-id"
+send_channelId: "your-channel-id"
+
+# コマンド,チャット入力を受け付けます、チェンネルidを指定致します。
+# チェンネルidに関しましては、コンソール出力を実施致したいチャンネルを表示致しました状態にて、検索ボックス付近にて、表示致しましております、urlより取得可能にてございます...
+# 例: https://discordapp.com/channels/000000000000000000/111111111111111111
+# receive_channelId: "111111111111111111"
+receive_channelId: "your-channel-id"
+...

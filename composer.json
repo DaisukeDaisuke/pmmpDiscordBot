@@ -1,14 +1,10 @@
 {
-  "name": "your-name/pocketmine-vscode",
+  "name": "daisukedaisuke/pmmpdiscordbot",
   "license": "WTFPL",
-  "description": "This is a template for developing PocketMine-MP plugin in VS Code.",
-  "authors": [
-    {
-      "name": "Your Name",
-      "email": "your@name.com"
-    }
-  ],
-  "require": {},
+  "description": "test",
+  "require": {
+	"team-reflex/discord-php": "^4.0"
+  },
   "require-dev": {
     "pocketmine/pocketmine-mp": "3.*"
   },
