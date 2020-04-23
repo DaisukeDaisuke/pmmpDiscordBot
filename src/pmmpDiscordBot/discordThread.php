@@ -50,7 +50,11 @@ class discordThread extends \Thread{
 		$send_channelId = $this->send_channelId;
 
 		$timer = $loop->addPeriodicTimer(2, function() use ($discord,$send_guildId,$send_channelId,$loop){
-			$this->task($discord,$send_guildId,$send_channelId,$loop);
+			$this->sendtask($discord,$send_guildId,$send_channelId,$loop);
+		});
+
+		$timer = $loop->addPeriodicTimer(0.05, function() use ($discord,$send_guildId,$send_channelId,$loop){
+			$this->checktask($discord,$send_guildId,$send_channelId,$loop);
 		});
 
 		$discord->on('ready', function($discord){
@@ -78,14 +82,8 @@ class discordThread extends \Thread{
 		//var_dump("stop!!");
 	}
 
-	public function task($discord,$send_guildId,$send_channelId,$loop){
+	public function sendtask($discord,$send_guildId,$send_channelId,$loop){
 		if(!$this->started) return;
-		if($this->stopped){
-			$discord->close();
-			$loop->stop();
-			$this->started = false;
-			return;
-		}
 		$test = preg_replace(['/\]0;.*\%/','/[\x07]/',"/Server thread\//"],'',TextFormat::clean(substr($this->test,0,1900)));//processtile,ANSIコードの削除を実施致します...
 		$this->test = strlen($this->test) <= 1900 ? "" : substr($this->test,1900);//
 		if($test !== ""){
@@ -94,15 +92,24 @@ class discordThread extends \Thread{
 			$channel->sendMessage("```\n".$test."\n```");
 			$this->test = "";
 		}
+	}
+
+	public function checktask($discord,$send_guildId,$send_channelId,$loop){
 		if(!$this->started) return;
+		if($this->stopped){
+			$discord->close();
+			$loop->stop();
+			$this->started = false;
+			return;
+		}
+
 		if(!$this->synchronized) return;
 
-		//ヒント: 101行付近より同期スレッド間データー受け渡しを実施しております...
+		//ヒント: 132行付近より同期スレッド間データー受け渡しを実施しております...
 		$this->synchronized(function() use ($discord){
 			$this->synchronized = false;
             $this->wait();
         });
-        
 	}
 
 	//===メインスレッド呼び出し専用関数にてございます...===
