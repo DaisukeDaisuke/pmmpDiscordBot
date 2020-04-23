@@ -14,17 +14,15 @@ class discordThread extends \Thread{
 	public $synchronized = false;
 	public $synchronized1 = false;
 	public $content;
+	public $no_vendor;
 	public $token;
 	public $send_guildId;
 	public $send_channelId;
 	public $receive_channelId;
 
-
-
-	//public $discord;
-
-	public function __construct($file,String $token,String $send_guildId,String $send_channelId,String $receive_channelId){
+	public function __construct($file,$no_vendor,String $token,String $send_guildId,String $send_channelId,String $receive_channelId){
 		$this->file = $file;
+		$this->no_vendor = $no_vendor;
 		$this->token = $token;
 		$this->send_guildId = $send_guildId;
 		$this->send_channelId = $send_channelId;
@@ -34,7 +32,9 @@ class discordThread extends \Thread{
 	}
  
 	public function run(){
-		include $this->file."vendor/autoload.php";
+		if(!$this->no_vendor){
+			include $this->file."vendor/autoload.php";
+		}
 
 		$loop = \React\EventLoop\Factory::create();
 		//$emitter = new \Evenement\EventEmitter();
@@ -49,8 +49,8 @@ class discordThread extends \Thread{
 		$send_guildId = $this->send_guildId;
 		$send_channelId = $this->send_channelId;
 
-		$timer = $loop->addPeriodicTimer(2, function() use ($discord,$send_guildId,$send_channelId){
-			$this->task($discord,$send_guildId,$send_channelId);
+		$timer = $loop->addPeriodicTimer(2, function() use ($discord,$send_guildId,$send_channelId,$loop){
+			$this->task($discord,$send_guildId,$send_channelId,$loop);
 		});
 
 		$discord->on('ready', function($discord){
@@ -78,8 +78,14 @@ class discordThread extends \Thread{
 		//var_dump("stop!!");
 	}
 
-	public function task($discord,$send_guildId,$send_channelId){
+	public function task($discord,$send_guildId,$send_channelId,$loop){
 		if(!$this->started) return;
+		if($this->stopped){
+			$discord->close();
+			$loop->stop();
+			$this->started = false;
+			return;
+		}
 		$test = preg_replace(['/\]0;.*\%/','/[\x07]/',"/Server thread\//"],'',TextFormat::clean(substr($this->test,0,1900)));//processtile,ANSIコードの削除を実施致します...
 		$this->test = strlen($this->test) <= 1900 ? "" : substr($this->test,1900);//
 		if($test !== ""){
@@ -103,6 +109,7 @@ class discordThread extends \Thread{
 
 	public function closeThread(){
 		$this->synchronized(function($thread){
+			$this->synchronized = true;
 			$thread->stopped = true;
 			$thread->notify();
 			//var_dump("closeThread");
