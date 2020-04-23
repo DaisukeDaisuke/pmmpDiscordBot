@@ -25,4 +25,4 @@ if(isset($argv[1])&&$argv[1] === "enableCompressAll"){
 	$phar->compressFiles(Phar::GZ);
 }
 $phar->stopBuffering();
-echo "end".PHP_EOL;
+echo "end.".PHP_EOL;
