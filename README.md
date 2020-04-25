@@ -7,8 +7,8 @@ https://github.com/DaisukeDaisuke/pmmpDiscordBot/releases
 
 ### develop
 開発バージョンに関しましては、GitHub Actionsよりダウンロード可能にてございます。  
-The development version can be downloaded from GitHub Actions.
-https://github.com/DaisukeDaisuke/pmmpDiscordBot/actions
+The development version can be downloaded from GitHub Actions.  
+https://github.com/DaisukeDaisuke/pmmpDiscordBot/actions  
 
 ## build
 ```
