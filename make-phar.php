@@ -21,6 +21,7 @@ $phar = new Phar($file_phar, 0);
 $phar->startBuffering();
 $phar->setSignatureAlgorithm(\Phar::SHA1);
 $phar->buildFromIterator(new \ArrayIterator($files));
+$phar->setStub('<?php __HALT_COMPILER();');
 if(isset($argv[1])&&$argv[1] === "enableCompressAll"){
 	$phar->compressFiles(Phar::GZ);
 }
