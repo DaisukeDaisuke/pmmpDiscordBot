@@ -7,28 +7,29 @@ use pocketmine\utils\TextFormat;
 class discordThread extends \Thread{
 	public $file;
 
-	public $test = "";
 	public $stopped = false;
 	public $started = false;
-	public $synchronized = false;
-	public $synchronized1 = false;
 	public $content;
 	public $no_vendor;
-	public $token;
+	private $token;
 	public $send_guildId;
 	public $send_channelId;
 	public $receive_channelId;
+	public $send_interval;
+	public $receive_check_interval;
 
 	protected $D2P_Queue;
 	protected $P2D_Queue;
 
-	public function __construct($file, $no_vendor, string $token, string $send_guildId, string $send_channelId, string $receive_channelId){
+	public function __construct($file, $no_vendor, string $token, string $send_guildId, string $send_channelId, string $receive_channelId, int $send_interval = 1){
 		$this->file = $file;
 		$this->no_vendor = $no_vendor;
 		$this->token = $token;
 		$this->send_guildId = $send_guildId;
 		$this->send_channelId = $send_channelId;
 		$this->receive_channelId = $receive_channelId;
+
+		$this->send_interval = $send_interval;
 
 		$this->D2P_Queue = new \Threaded;
 		$this->P2D_Queue = new \Threaded;
@@ -115,7 +116,7 @@ class discordThread extends \Thread{
 		$this->stopped = true;
 	}
 
-	public function sendMessage(String $message){
+	public function sendMessage(string $message){
 		//var_dump("send".$message);
 		$this->P2D_Queue[] = serialize($message);
 	}

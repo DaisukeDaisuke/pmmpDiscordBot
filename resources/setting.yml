@@ -2,4 +2,17 @@
 # 以下の値に関しましては、「true」の場合、「vendor」ファイルの存在確認、読み込みを実施致しません。
 # teamreflex/discordphp ライブラリを他ブラフイン等にて既に読み込んでおります、環境向けの設定にてございます。
 no-vendor: false
+
+# discordサーバーにメッセージを送信を実施致します、間隔を指定します。
+# 必ず1秒以上に設定致します事ををお勧めします。
+# 単位 = 秒数
+send-discord-interval: 2
+
+# discordサーバーより受け取りました、メッセージの処理間隔を指定致します。
+# 以下の値を下げると、discordからのメッセージ受信は速くなりますが、サーバーへの負荷が高くなります。
+# 単位 = 20/1秒
+# receive-check-interval: 40 # 2秒
+# receive-check-interval: 20 # 1秒
+# receive-check-interval: 5 # 0.25秒
+receive-check-interval: 5
 ...

@@ -14,6 +14,8 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 	public $client;
 	public $started = false;
 
+	public $receive_check_interval;
+
 	public function onEnable(){
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		$this->getLogger()->info("discordbotをバックグラウンドにて起動しております...");
@@ -28,6 +30,9 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		$send_guildId = $tokenConfig->get("send_guildId", "your-guild-id");
 		$send_channelId = $tokenConfig->get("send_channelId", "your-channel-id");
 		$receive_channelId = $tokenConfig->get("receive_channelId", "your-channel-id");
+
+		unset($tokenConfig);
+
 		if($token === "your-auth-token"||$send_guildId === "your-guild-id"||$send_channelId === "your-channel-id"||$receive_channelId === "your-channel-id"){
 			$this->getLogger()->info("[PocketMine-MP]/plugin_data/pmmpDiscordBot/token.yml 上の一部の設定に関しましては不正の為、ファイルの中身を編集していただきたいです...");
 			$error = true;
@@ -40,13 +45,23 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 			$error = true;
 		}
 
+		$send_interval = (int) $settingConfig->get("send-discord-interval", 2);
+		$this->receive_check_interval = (int) $settingConfig->get("receive-check-interval", 1);
+
+		if($send_interval < 1||$this->receive_check_interval < 1){
+			$this->getLogger()->error("「send-discord-interval」または「receive-check-interval」設定の値を1以下にすることは出来ません。");
+			$error = true;
+		}
+
 		if($error === true){
 			$this->getLogger()->info("§cこのプラグインを無効化致します。§r");
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
 		}
 
-		$this->client = new discordThread($this->getFile(), $no_vendor, $token, $send_guildId, $send_channelId, $receive_channelId);
+		$this->client = new discordThread($this->getFile(), $no_vendor, $token, $send_guildId, $send_channelId, $receive_channelId, $send_interval);
+
+		unset($token);
 
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(
 			function(int $currentTick): void{
@@ -78,7 +93,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 					}
 				}
 			}
-		), 5, 2);
+		), 5, $this->receive_check_interval);
 	}
 
 	public function onDisable(){
