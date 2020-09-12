@@ -75,25 +75,19 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 			function(int $currentTick): void{
 				if(!$this->started) return;
 				$string = ob_get_contents();
-
-				if($string === "") return;
 				$this->client->sendMessage($string);
 				ob_flush();
-			}
-		), 10, 1);
 
-		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
-			function(int $currentTick): void{
 				foreach($this->client->fetchMessages() as $message){
 					$content = $message["content"];
-					if($content[0] === "/"){
+					if($content[0] === "/"){//
 						Server::getInstance()->dispatchCommand(new ConsoleCommandSender(), substr($content, 1));
 					}else{
 						Server::getInstance()->dispatchCommand(new ConsoleCommandSender(), "me ".$content);
 					}
 				}
 			}
-		), 5, $this->receive_check_interval);
+		), 10, 5);
 	}
 
 	public function onDisable(){

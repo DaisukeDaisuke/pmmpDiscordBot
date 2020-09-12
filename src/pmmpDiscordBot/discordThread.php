@@ -117,7 +117,7 @@ class discordThread extends \Thread{
 	}
 
 	public function sendMessage(string $message){
-		//var_dump("send".$message);
+		if($message === "") return;
 		$this->P2D_Queue[] = serialize($message);
 	}
 
