@@ -1,5 +1,5 @@
 {
     "require": {
-        "team-reflex/discord-php": "dev-develop"
+        "team-reflex/discord-php": "^5.0"
     }
 }
