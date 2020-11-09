@@ -11,9 +11,4 @@ token: "your-auth-token"
 send_guildId: "your-guild-id"
 send_channelId: "your-channel-id"
 
-# コマンド,チャット入力を受け付けます、チェンネルidを指定致します。
-# チェンネルidに関しましては、コンソール出力を実施致したいチャンネルを表示致しました状態にて、検索ボックス付近にて、表示致しましております、urlより取得可能にてございます...
-# 例: https://discordapp.com/channels/000000000000000000/111111111111111111
-# receive_channelId: "111111111111111111"
-receive_channelId: "your-channel-id"
 ...

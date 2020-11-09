@@ -1,17 +1,5 @@
 {
-  "name": "daisukedaisuke/pmmpdiscordbot",
-  "license": "WTFPL",
-  "description": "test",
-  "require": {
-	"team-reflex/discord-php": "^4.0"
-  },
-  "require-dev": {
-    "pocketmine/pocketmine-mp": "3.*"
-  },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/pmmp/PocketMine-MP.git"
+    "require": {
+        "team-reflex/discord-php": "dev-develop"
     }
-  ]
 }
