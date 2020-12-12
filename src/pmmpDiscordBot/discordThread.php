@@ -6,7 +6,7 @@ use Discord\Discord;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
-use Discord\WebSockets\Event;
+use Discord\Parts\WebSockets\MessageReaction;
 use pocketmine\utils\TextFormat;
 
 class discordThread extends \Thread{
@@ -25,7 +25,10 @@ class discordThread extends \Thread{
 
 	const MESSAGE_EMOJI = 11;//絵文字本体「🤔」等...
 	const MESSAGE_EMOJI_ID = 12;//????? 絵文字Id「null」等...
-	const MESSAGE_DISCRIMINATOR = 13;
+	const MESSAGE_DISCRIMINATOR = 13;//string "8555" etc...
+	const MESSAGE_CONTENTS_TYPE = 14;//int 0-15 @see https://github.com/teamreflex/DiscordPHP/blob/master/src/Discord/Parts/Channel/Message.php#L64
+
+	const MESSAGE_CONTENTS_NORMAL = 0;
 	//const MESSAGE = 1;
 	//const MESSAGE_ID = 2;
 
@@ -117,109 +120,62 @@ class discordThread extends \Thread{
 			$botUserId = $discord->user->id;
 			// = $this->receive_channelId;
 
-			$discord->on('message', function(\Discord\Parts\Channel\Message $message) use ($botUserId){//, $receive_channelId
+			$discord->on('message', function(Message $message) use ($botUserId){//, $receive_channelId
 				//$message->react("🤔");
-				if($message->author instanceof Member){
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_REPLY,//
-						self::MESSAGE => $message->content,
-						self::MESSAGE_ID => $message->id,
-						self::MESSAGE_GUILDID => $message->channel->guild_id,
-						self::MESSAGE_CHANNELID => $message->channel->id,
-						self::MESSAGE_USERNAME => $message->author->username,
-						self::MESSAGE_USERID => $message->author->id,
-						self::MESSAGE_ISBOT => $message->author->user->bot ?? false,
-						self::MESSAGE_IS_MYSELF => ($message->author->user->id === $botUserId),
-						self::MESSAGE_IS_DM => false,
-						//'md5' => md5($message["content"]),
-					]);
-				}else{
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_REPLY,//
-						self::MESSAGE => $message->content,
-						self::MESSAGE_ID => $message->id,
-						self::MESSAGE_GUILDID => $message->channel->guild_id,
-						self::MESSAGE_CHANNELID => $message->channel->id,
-						self::MESSAGE_USERNAME => $message->author->username,
-						self::MESSAGE_USERID => $message->author->id,
-						self::MESSAGE_ISBOT => $message->author->bot ?? false,
-						self::MESSAGE_IS_MYSELF => ($message->author->id === $botUserId),
-						self::MESSAGE_IS_DM => true,
-						//'md5' => md5($message["content"]),
-					]);
+				if($message->type !== Message::TYPE_NORMAL){
+					return;//join message etc...
 				}
+
+				$this->D2P_Queue[] = serialize([
+					self::MESSAGE_TYPE => self::MESSAGE_TYPE_REPLY,//
+					self::MESSAGE => $message->content,
+					self::MESSAGE_ID => $message->id,
+					self::MESSAGE_GUILDID => $message->channel->guild_id ?? null,
+					self::MESSAGE_CHANNELID => $message->channel_id,
+					self::MESSAGE_USERNAME => $message->author->username,
+					self::MESSAGE_USERID => $message->author->id,
+					self::MESSAGE_ISBOT => $message->author->bot ?? false,
+					self::MESSAGE_IS_MYSELF => ($message->author->id === $botUserId),
+					self::MESSAGE_IS_DM => $message->channel->is_private,
+					//self::MESSAGE_CONTENTS_TYPE => $message->type,
+					//'md5' => md5($message["content"]),
+				]);
 			});
-			$discord->on("MESSAGE_REACTION_ADD", function(\stdClass $obj, Discord $discord) use ($botUserId){
-				if(isset($obj->member)){
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_ADD,//
+			$discord->on("MESSAGE_REACTION_ADD", function(MessageReaction $reaction, Discord $discord) use ($botUserId){
+				$this->D2P_Queue[] = serialize([
+					self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_ADD,//
 
-						self::MESSAGE_ID => $obj->message_id,
-						self::MESSAGE_GUILDID => $obj->guild_id,
-						self::MESSAGE_CHANNELID => $obj->channel_id,
-						self::MESSAGE_USERNAME => $obj->member->user->username,
-						self::MESSAGE_USERID => $obj->user_id,
+					self::MESSAGE_ID => $reaction->message_id,
+					self::MESSAGE_GUILDID => $reaction->guild_id,
+					self::MESSAGE_CHANNELID => $reaction->channel_id,
+					//self::MESSAGE_USERNAME => $reaction->member->user->username,
+					self::MESSAGE_USERID => $reaction->user_id,
 
-						self::MESSAGE_IS_MYSELF => ($obj->user_id === $botUserId),
-						self::MESSAGE_IS_DM => false,
+					self::MESSAGE_IS_MYSELF => ($reaction->user_id === $botUserId),
+					//self::MESSAGE_IS_DM => $reaction->channel->is_private,
 
-						self::MESSAGE_EMOJI => $obj->emoji->name,
-						self::MESSAGE_EMOJI_ID => $obj->emoji->id,
-
-						//'md5' => md5($message["content"]),
-					]);
-				}else{
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_ADD,//
-
-						self::MESSAGE_ID => $obj->message_id,
-						self::MESSAGE_USERID => $obj->user_id,
-
-						self::MESSAGE_IS_MYSELF => ($obj->user_id === $botUserId),
-						self::MESSAGE_IS_DM => true,
-
-						self::MESSAGE_EMOJI => $obj->emoji->name,
-						self::MESSAGE_EMOJI_ID => $obj->emoji->id,
-					]);
-
-				}
+					self::MESSAGE_EMOJI => $reaction->emoji->name,
+					self::MESSAGE_EMOJI_ID => $reaction->emoji->id,
+				]);
 			});
-			$discord->on("MESSAGE_REACTION_REMOVE",function(\stdClass $obj, Discord $discord) use ($botUserId){
-				if(isset($obj->guild_id)){
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_REMOVE,//
+			$discord->on("MESSAGE_REACTION_REMOVE", function(MessageReaction $reaction, Discord $discord) use ($botUserId){
+				$this->D2P_Queue[] = serialize([
+					self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_REMOVE,//
 
-						self::MESSAGE_ID => $obj->message_id,
-						self::MESSAGE_GUILDID => $obj->guild_id,
-						self::MESSAGE_CHANNELID => $obj->channel_id,
-						self::MESSAGE_USERID => $obj->user_id,
+					self::MESSAGE_ID => $reaction->message_id,
+					self::MESSAGE_GUILDID => $reaction->guild_id,
+					self::MESSAGE_CHANNELID => $reaction->channel_id,
+					//self::MESSAGE_USERNAME => $reaction->member->user->username,
+					self::MESSAGE_USERID => $reaction->user_id,
 
-						self::MESSAGE_IS_MYSELF => ($obj->user_id === $botUserId),
-						self::MESSAGE_IS_DM => false,
+					self::MESSAGE_IS_MYSELF => ($reaction->user_id === $botUserId),
+					//self::MESSAGE_IS_DM => $reaction->channel->is_private,
 
-						self::MESSAGE_EMOJI => $obj->emoji->name,
-						self::MESSAGE_EMOJI_ID => $obj->emoji->id,
-
-						//'md5' => md5($message["content"]),
-					]);
-				}else{
-					$this->D2P_Queue[] = serialize([
-						self::MESSAGE_TYPE => self::MESSAGE_TYPE_EMOJI_REMOVE,//
-
-						self::MESSAGE_ID => $obj->message_id,
-						self::MESSAGE_CHANNELID => $obj->channel_id,
-						self::MESSAGE_USERID => $obj->user_id,
-
-						self::MESSAGE_IS_MYSELF => ($obj->user_id === $botUserId),
-						self::MESSAGE_IS_DM => true,
-
-						self::MESSAGE_EMOJI => $obj->emoji->name,
-						self::MESSAGE_EMOJI_ID => $obj->emoji->id,
-					]);
-				}
+					self::MESSAGE_EMOJI => $reaction->emoji->name,
+					self::MESSAGE_EMOJI_ID => $reaction->emoji->id,
+				]);
 			});
-			$discord->on("GUILD_MEMBER_ADD",function(Member $member,Discord $discord) use ($botUserId){
-				var_dump("test");
+			$discord->on("GUILD_MEMBER_ADD", function(Member $member, Discord $discord) use ($botUserId){
 				$this->D2P_Queue[] = serialize([
 					self::MESSAGE_TYPE => self::MESSAGE_TYPE_MEMBER_ADD,//
 
@@ -233,7 +189,7 @@ class discordThread extends \Thread{
 					self::MESSAGE_DISCRIMINATOR => $member->user->discriminator,
 				]);
 			});
-			$discord->on("GUILD_MEMBER_REMOVE",function(Member $member,Discord $discord) use ($botUserId){
+			$discord->on("GUILD_MEMBER_REMOVE", function(Member $member, Discord $discord) use ($botUserId){
 				$this->D2P_Queue[] = serialize([
 					self::MESSAGE_TYPE => self::MESSAGE_TYPE_MEMBER_REMOVE,//
 
@@ -248,13 +204,23 @@ class discordThread extends \Thread{
 					//joined_at...?
 				]);
 			});
-			$discord->on("MESSAGE_DELETE",function(\stdClass $obj, Discord $discord) use ($botUserId){
+
+			$discord->on("MESSAGE_DELETE", function($obj, Discord $discord) use ($botUserId){
+				/** @var \stdClass|Message $obj */
+				if($obj instanceof Message){
+					//Message is present in cache
+					$this->D2P_Queue[] = serialize([
+						self::MESSAGE_TYPE => self::MESSAGE_TYPE_DELETE,//
+						self::MESSAGE_ID => $obj->id,
+						self::MESSAGE_CHANNELID => $obj->channel_id,//...?
+					]);
+					return;
+				}
 				$this->D2P_Queue[] = serialize([
 					self::MESSAGE_TYPE => self::MESSAGE_TYPE_DELETE,//
 
 					self::MESSAGE_ID => $obj->id,
 					self::MESSAGE_CHANNELID => $obj->channel_id,
-					self::MESSAGE_GUILDID => $obj->guild_id,
 				]);
 			});
 		});
@@ -264,7 +230,7 @@ class discordThread extends \Thread{
 	public function messageUpdate($discord, string $messageId, $channel, string $contents){
 		$channel = $channel instanceof Channel ? $channel : $discord->factory(Channel::class, ['id' => $channel]);
 		$message = $discord->factory(Message::class, ['id' => $messageId]);
-		$channel->editMessage($message,$contents);
+		$channel->editMessage($message, $contents);
 	}
 
 	public function task($discord, $channel){
