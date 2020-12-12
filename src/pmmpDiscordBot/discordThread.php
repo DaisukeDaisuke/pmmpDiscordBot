@@ -4,6 +4,7 @@ namespace pmmpDiscordBot;
 
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
+use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
 use pocketmine\utils\TextFormat;
@@ -218,6 +219,7 @@ class discordThread extends \Thread{
 				}
 			});
 			$discord->on("GUILD_MEMBER_ADD",function(Member $member,Discord $discord) use ($botUserId){
+				var_dump("test");
 				$this->D2P_Queue[] = serialize([
 					self::MESSAGE_TYPE => self::MESSAGE_TYPE_MEMBER_ADD,//
 
@@ -261,13 +263,8 @@ class discordThread extends \Thread{
 
 	public function messageUpdate($discord, string $messageId, $channel, string $contents){
 		$channel = $channel instanceof Channel ? $channel : $discord->factory(Channel::class, ['id' => $channel]);
-		$channel->messages->fetch($messageId)->then(function($message) use ($channel, $contents){
-			$message->content = $contents;
-
-			$channel->messages->save($message)->then(function($message) use ($channel){
-				// message has been updated
-			});
-		});
+		$message = $discord->factory(Message::class, ['id' => $messageId]);
+		$channel->editMessage($message,$contents);
 	}
 
 	public function task($discord, $channel){
