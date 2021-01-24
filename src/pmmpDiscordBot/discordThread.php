@@ -2,6 +2,8 @@
 
 namespace pmmpDiscordBot;
 
+use Discord\Parts\Channel\Message;
+use Monolog\Logger;
 use pocketmine\utils\TextFormat;
 
 class discordThread extends \Thread{
@@ -17,11 +19,12 @@ class discordThread extends \Thread{
 	public $receive_channelId;
 	public $send_interval;
 	public $receive_check_interval;
+	public $debug;
 
 	protected $D2P_Queue;
 	protected $P2D_Queue;
 
-	public function __construct($file, $no_vendor, string $token, string $send_guildId, string $send_channelId, string $receive_channelId, int $send_interval = 1){
+	public function __construct($file, $no_vendor, string $token, string $send_guildId, string $send_channelId, string $receive_channelId, int $send_interval = 1, bool $debug = false){
 		$this->file = $file;
 		$this->no_vendor = $no_vendor;
 		$this->token = $token;
@@ -30,6 +33,8 @@ class discordThread extends \Thread{
 		$this->receive_channelId = $receive_channelId;
 
 		$this->send_interval = $send_interval;
+
+		$this->debug = $debug;
 
 		$this->D2P_Queue = new \Threaded;
 		$this->P2D_Queue = new \Threaded;
@@ -45,9 +50,12 @@ class discordThread extends \Thread{
 		$loop = \React\EventLoop\Factory::create();
 		//$emitter = new \Evenement\EventEmitter();
 
+		$debug = $this->debug;
+
 		$discord = new \Discord\Discord([
 			'token' => $this->token,
 			"loop" => $loop,
+			'loggerLevel' => ($debug ? Logger::INFO : Logger::WARNING),
 		]);
 
 		//sleep(1);//...?
@@ -65,7 +73,6 @@ class discordThread extends \Thread{
 			$this->task($discord);
 		});
 
-
 		unset($this->token);
 
 		$discord->on('ready', function($discord){
@@ -75,9 +82,11 @@ class discordThread extends \Thread{
 			$botUserId = $discord->user->id;
 			$receive_channelId = $this->receive_channelId;
 
-			$discord->on('message', function($message) use ($botUserId, $receive_channelId){
-				if($message->channel->id === $receive_channelId){
-					if($message->author->user->id === $botUserId) return;
+			$discord->on('message', function(Message $message) use ($botUserId, $receive_channelId){
+				if($message->channel_id === $receive_channelId){
+					if($message->type !== Message::TYPE_NORMAL) return;//join message etc...
+					if($message->author->id === $botUserId) return;
+
 					$this->D2P_Queue[] = serialize([
 						'username' => $message->author->username,
 						'content' => $message->content

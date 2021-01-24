@@ -33,6 +33,13 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 
 		unset($tokenConfig);
 
+		$debug = false;
+		$debuglog = (bool) $settingConfig->get("debuglog", false);
+		if($debuglog === true){
+			$this->getLogger()->notice("debugモードは有効です。コンソールへdiscordbotのログを出力します。");
+			$debug = true;
+		}
+
 		if($token === "your-auth-token"||$send_guildId === "your-guild-id"||$send_channelId === "your-channel-id"||$receive_channelId === "your-channel-id"){
 			$this->getLogger()->info("[PocketMine-MP]/plugin_data/pmmpDiscordBot/token.yml 上の一部の設定に関しましては不正の為、ファイルの中身を編集していただきたいです...");
 			$error = true;
@@ -53,13 +60,16 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 			$error = true;
 		}
 
+		$send_interval = (bool) $settingConfig->get("send-discord-interval", false);
+		$this->receive_check_interval = (int) $settingConfig->get("receive-check-interval", 1);
+
 		if($error === true){
 			$this->getLogger()->info("§cこのプラグインを無効化致します。§r");
 			$this->getServer()->getPluginManager()->disablePlugin($this);
 			return;
 		}
 
-		$this->client = new discordThread($this->getFile(), $no_vendor, $token, $send_guildId, $send_channelId, $receive_channelId, $send_interval);
+		$this->client = new discordThread($this->getFile(), $no_vendor, $token, $send_guildId, $send_channelId, $receive_channelId, $send_interval, $debug);
 
 		unset($token);
 

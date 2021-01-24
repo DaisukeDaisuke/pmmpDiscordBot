@@ -15,4 +15,10 @@ send-discord-interval: 2
 # receive-check-interval: 20 # 1秒
 # receive-check-interval: 5 # 0.25秒
 receive-check-interval: 5
+
+# 「true」の場合、より多くのログ出力を有効化致します。
+# discordへ接続出来ない場合に有益です。
+# 無効化実施したい場合、以下の値を「false」に変更します。
+debuglog: false
+
 ...

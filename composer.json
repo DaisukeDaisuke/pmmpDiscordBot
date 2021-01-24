@@ -3,7 +3,7 @@
   "license": "WTFPL",
   "description": "test",
   "require": {
-	"team-reflex/discord-php": "^4.0"
+	"team-reflex/discord-php": "^5.0"
   },
   "require-dev": {
     "pocketmine/pocketmine-mp": "3.*"
