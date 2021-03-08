@@ -108,11 +108,9 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 
 	public function onDisable(){
 		if(!$this->started) return;
-		$this->getLogger()->info("出力バッファリングを終了しています...");
 		$this->client->shutdown();
+		$this->getLogger()->info("出力バッファリングを終了しています...");
 		ob_flush();
 		ob_end_clean();
-		$this->getLogger()->info("discordBotの終了を待機しております...");
-		$this->client->join();
 	}
 }

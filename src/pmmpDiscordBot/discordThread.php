@@ -4,12 +4,12 @@ namespace pmmpDiscordBot;
 
 use Discord\Parts\Channel\Message;
 use Monolog\Logger;
+use pocketmine\Thread;
 use pocketmine\utils\TextFormat;
 
-class discordThread extends \Thread{
+class discordThread extends Thread{
 	public $file;
 
-	public $stopped = false;
 	public $started = false;
 	public $content;
 	public $no_vendor;
@@ -39,10 +39,15 @@ class discordThread extends \Thread{
 		$this->D2P_Queue = new \Threaded;
 		$this->P2D_Queue = new \Threaded;
 
-		$this->start();
+		$this->start(PTHREADS_INHERIT_CONSTANTS);
 	}
 
 	public function run(){
+		//ini_set('memory_limit', '512M');
+		error_reporting(-1);
+		$this->registerClassLoader();
+		gc_enable();
+
 		if(!$this->no_vendor){
 			include $this->file."vendor/autoload.php";
 		}
@@ -61,7 +66,7 @@ class discordThread extends \Thread{
 		//sleep(1);//...?
 
 		$timer = $loop->addPeriodicTimer(1, function() use ($discord){
-			if($this->stopped){
+			if($this->isKilled){
 				$discord->close();
 				$discord->loop->stop();
 				$this->started = false;
@@ -122,7 +127,9 @@ class discordThread extends \Thread{
 
 	//===メインスレッド呼び出し専用関数にてございます...===
 	public function shutdown(){
-		$this->stopped = true;
+		$this->isKilled = true;
+		//usleep(500000);
+		//$this->quit();
 	}
 
 	public function sendMessage(string $message){
