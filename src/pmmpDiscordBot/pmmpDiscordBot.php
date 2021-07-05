@@ -74,7 +74,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		unset($token);
 
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(
-			function(int $currentTick): void{
+			function(int $currentTick) : void{
 				$this->started = true;
 				$this->getLogger()->info("出力バッファリングを開始致します。");
 				ob_start();
@@ -82,7 +82,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		), 10);
 
 		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
-			function(int $currentTick): void{
+			function(int $currentTick) : void{
 				if(!$this->started) return;
 				$string = ob_get_contents();
 
@@ -93,9 +93,12 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		), 10, 1);
 
 		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
-			function(int $currentTick): void{
+			function(int $currentTick) : void{
 				foreach($this->client->fetchMessages() as $message){
 					$content = $message["content"];
+					if($content === ""){
+						continue;
+					}
 					if($content[0] === "/"){
 						Server::getInstance()->dispatchCommand(new ConsoleCommandSender(), substr($content, 1));
 					}else{
