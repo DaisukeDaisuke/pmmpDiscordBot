@@ -2,7 +2,16 @@
 DiscordからPocketMine-MPのコンソールを操作します。
 ## vs
 This is a plugin written for my server, so if you want to write a discord bot with pmmp, the following plugins are better.  
+## DiscordBot
 https://github.com/DiscordBot-PMMP/DiscordBot  
+## MCPEDiscordRelay
+https://github.com/nomadjimbob/MCPEDiscordRelay/  
+  
+https://poggit.pmmp.io/p/MCPEDiscordRelay  
+## MCPEToDiscord (archived)
+https://github.com/JaxkDev/MCPEToDiscord/
+
+https://poggit.pmmp.io/p/MCPEToDiscord
 ## download
 ### release
 https://github.com/DaisukeDaisuke/pmmpDiscordBot/releases  
