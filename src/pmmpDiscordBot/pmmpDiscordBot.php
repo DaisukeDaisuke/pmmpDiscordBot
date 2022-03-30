@@ -2,21 +2,18 @@
 
 namespace pmmpDiscordBot;
 
-use pocketmine\command\ConsoleCommandSender;
 use pocketmine\event\Listener;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
-use pocketmine\Server;
 use pocketmine\utils\Config;
 
 class pmmpDiscordBot extends PluginBase implements Listener{
-	/** @var discordThread */
-	public $client;
-	public $started = false;
+	public discordThread $client;
+	public bool $started = false;
+	public int $receive_check_interval;
+	private ThreadedLogListener $loggerListener;
 
-	public $receive_check_interval;
-
-	public function onEnable(){
+	public function onEnable() : void{
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 		$this->getLogger()->info("discordbotをバックグラウンドにて起動しております...");
 
@@ -74,46 +71,34 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		unset($token);
 
 		$this->getScheduler()->scheduleDelayedTask(new ClosureTask(
-			function(int $currentTick) : void{
+			function() : void{
 				$this->started = true;
 				$this->getLogger()->info("出力バッファリングを開始致します。");
-				ob_start();
+				$this->loggerListener = new ThreadedLogListener($this->client);
+				$this->getServer()->getLogger()->addAttachment($this->loggerListener);
 			}
 		), 10);
 
-		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
-			function(int $currentTick) : void{
-				if(!$this->started) return;
-				$string = ob_get_contents();
+//		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
+//			function() : void{
+//				if(!$this->started) return;
+//				$string = ob_get_contents();
+//				var_dump($string);
+//				if($string === "") return;
+//				$this->client->sendMessage($string);
+//				ob_flush();
+//			}
+//		), 10, 1);
 
-				if($string === "") return;
-				$this->client->sendMessage($string);
-				ob_flush();
-			}
-		), 10, 1);
 
-		$this->getScheduler()->scheduleDelayedRepeatingTask(new ClosureTask(
-			function(int $currentTick) : void{
-				foreach($this->client->fetchMessages() as $message){
-					$content = $message["content"];
-					if($content === ""){
-						continue;
-					}
-					if($content[0] === "/"){
-						Server::getInstance()->dispatchCommand(new ConsoleCommandSender(), substr($content, 1));
-					}else{
-						Server::getInstance()->dispatchCommand(new ConsoleCommandSender(), "me ".$content);
-					}
-				}
-			}
-		), 5, $this->receive_check_interval);
 	}
 
-	public function onDisable(){
+	public function onDisable() : void{
+		if(isset($this->loggerListener)){
+			$this->getServer()->getLogger()->removeAttachment($this->loggerListener);
+		}
 		if(!$this->started) return;
-		$this->client->shutdown();
+		//$this->client->shutdown();
 		$this->getLogger()->info("出力バッファリングを終了しています...");
-		ob_flush();
-		ob_end_clean();
 	}
 }

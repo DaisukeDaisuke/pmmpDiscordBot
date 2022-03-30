@@ -3,10 +3,11 @@
   "license": "WTFPL",
   "description": "test",
   "require": {
-	"team-reflex/discord-php": "^5.0"
+    "team-reflex/discord-php": "^7.0",
+    "ext-pthreads": "*"
   },
   "require-dev": {
-    "pocketmine/pocketmine-mp": "3.*"
+    "pocketmine/pocketmine-mp": "4.*"
   },
   "repositories": [
     {
