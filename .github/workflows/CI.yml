@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
       - name: Install dependencies
-        run: composer install --no-dev --prefer-dist --no-progress --no-suggest
+        run: composer install --prefer-dist --no-progress --no-dev --ignore-platform-reqs
       - name: Build source code
         run: php -dphar.readonly=0 ./make-phar.php enableCompressAll
       - name: Upload artifact

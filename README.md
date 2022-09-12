@@ -25,7 +25,7 @@ https://github.com/DaisukeDaisuke/pmmpDiscordBot/actions
 ```
 git clone git@github.com:DaisukeDaisuke/pmmpDiscordBot.git
 cd pmmpDiscordBot
-composer update --no-dev --prefer-dist --no-suggest
+composer install --no-dev --ignore-platform-reqs
 php -dphar.readonly=0 ./make-phar.php enableCompressAll
 ```
 ##### If make-phar.php does not work, please try the following command.

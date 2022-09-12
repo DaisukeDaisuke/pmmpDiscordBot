@@ -12,7 +12,6 @@
   "config": {
     "platform": {
       "php": "8.0.21"
-    },
-    "platform-check": false
+    }
   }
 }
