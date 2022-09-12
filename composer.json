@@ -9,10 +9,10 @@
   "require-dev": {
     "pocketmine/pocketmine-mp": "4.*"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/pmmp/PocketMine-MP.git"
-    }
-  ]
+  "config": {
+    "platform": {
+      "php": "8.0.21"
+    },
+    "platform-check": false
+  }
 }
