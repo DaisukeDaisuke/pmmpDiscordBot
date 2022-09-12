@@ -17,6 +17,7 @@ class discordThread extends Thread{
 	public $file;
 
 	public $started = false;
+	public $shutdown = false;
 	public $content;
 	public $no_vendor;
 	private $token;
@@ -95,11 +96,13 @@ class discordThread extends Thread{
 		]);
 
 		$timer = $loop->addPeriodicTimer(1, function() use ($discord){
-			if($this->isKilled){
-				// $discord->getChannel($this->send_channelId)->sendMessage("サーバーを停止しています...")->then(function (Message $message) use ($discord){
+			if($this->isKilled&&!$this->shutdown){
+				$this->shutdown = true;
+				// $discord->getChannel($this->send_channelId)->sendMessage("サーバーを停止しています...")->done(function (Message $message) use ($discord){
 				// 	$discord->close();
 				// 	$discord->loop->stop();
 				// 	$this->started = false;
+				// 	\var_dump("shutdown", $message);
 				// });
 				$discord->close();
 				$discord->loop->stop();

@@ -98,8 +98,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 			$this->getServer()->getLogger()->removeAttachment($this->loggerListener);
 		}
 		if(!$this->started) return;
-		//$this->client->shutdown();
-		$this->client->quit();
+		$this->client->shutdown();
 		$this->getLogger()->info("出力バッファリングを終了しています...");
 	}
 }
