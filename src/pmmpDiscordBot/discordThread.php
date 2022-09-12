@@ -96,6 +96,11 @@ class discordThread extends Thread{
 
 		$timer = $loop->addPeriodicTimer(1, function() use ($discord){
 			if($this->isKilled){
+				// $discord->getChannel($this->send_channelId)->sendMessage("サーバーを停止しています...")->then(function (Message $message) use ($discord){
+				// 	$discord->close();
+				// 	$discord->loop->stop();
+				// 	$this->started = false;
+				// });
 				$discord->close();
 				$discord->loop->stop();
 				$this->started = false;

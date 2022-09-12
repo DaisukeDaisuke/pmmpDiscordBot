@@ -99,6 +99,7 @@ class pmmpDiscordBot extends PluginBase implements Listener{
 		}
 		if(!$this->started) return;
 		//$this->client->shutdown();
+		$this->client->quit();
 		$this->getLogger()->info("出力バッファリングを終了しています...");
 	}
 }
