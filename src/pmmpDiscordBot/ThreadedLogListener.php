@@ -2,7 +2,10 @@
 
 namespace pmmpDiscordBot;
 
-class ThreadedLogListener extends \ThreadedLoggerAttachment{
+use pocketmine\thread\log\ThreadSafeLoggerAttachment;
+use pmmp\thread\Thread;
+
+class ThreadedLogListener extends ThreadSafeLoggerAttachment{
 	/** @var int */
 	private $mainThreadId;
 	/** @var discordThread */
@@ -10,11 +13,11 @@ class ThreadedLogListener extends \ThreadedLoggerAttachment{
 
 	public function __construct(discordThread $discord){
 		self::$discord = $discord;
-		$this->mainThreadId = \Thread::getCurrentThreadId();
+		$this->mainThreadId = Thread::getCurrentThreadId();
 	}
 
-	public function log($level, $message){
-		if(\Thread::getCurrentThreadId() === $this->mainThreadId){
+	public function log(string $level, string $message) : void{
+		if(Thread::getCurrentThreadId() === $this->mainThreadId){
 			//server thread
 			self::$discord->sendMessage($message);
 		}else{

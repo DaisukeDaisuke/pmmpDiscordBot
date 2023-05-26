@@ -8,17 +8,18 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\Server;
-use pocketmine\snooze\SleeperNotifier;
 use pocketmine\thread\Thread;
 use pocketmine\utils\TextFormat;
 use React\EventLoop\Loop;
+use pmmp\thread\ThreadSafeArray;
+use pocketmine\snooze\SleeperHandlerEntry;
+use pocketmine\utils\MainLogger;
 
 class discordThread extends Thread{
 	public $file;
 
 	public $started = false;
 	public $shutdown = false;
-	public $content;
 	public $no_vendor;
 	private $token;
 	public $send_guildId;
@@ -28,17 +29,14 @@ class discordThread extends Thread{
 	public $receive_check_interval;
 	public $debug;
 
-	protected $D2P_Queue;
-	protected $P2D_Queue;
+	protected ThreadSafeArray $D2P_Queue;
+	protected ThreadSafeArray $P2D_Queue;
 
 	/** pmmp api */
 
-	/** @var \ThreadedLogger */
-	protected $logger;
-	/** @var SleeperNotifier */
-	protected $notifier;
-	/** @var ConsoleCommandSender */
-	private static $consoleSender;
+	protected MainLogger $logger;
+	protected SleeperHandlerEntry $notifierEntry;
+	private static ConsoleCommandSender $consoleSender;
 
 	public function __construct($file, $no_vendor, string $token, string $send_guildId, string $send_channelId, string $receive_channelId, int $send_interval = 1, bool $debug = false){
 		$this->file = $file;
@@ -52,8 +50,8 @@ class discordThread extends Thread{
 
 		$this->debug = $debug;
 
-		$this->D2P_Queue = new \Threaded;
-		$this->P2D_Queue = new \Threaded;
+		$this->D2P_Queue = new ThreadSafeArray();
+		$this->P2D_Queue = new ThreadSafeArray();
 
 		$server = Server::getInstance();
 		self::$consoleSender = new ConsoleCommandSender($server, $server->getLanguage());
@@ -64,9 +62,8 @@ class discordThread extends Thread{
 	}
 
 	private function initSleeperNotifier() : void{
-		if(isset($this->notifier)) throw new \LogicException("SleeperNotifier has already been initialized.");
-		$this->notifier = new SleeperNotifier();
-		Server::getInstance()->getTickSleeper()->addNotifier($this->notifier, function(){
+		if(isset($this->notifierEntry)) throw new \LogicException("SleeperNotifier has already been initialized.");
+		$this->notifierEntry = Server::getInstance()->getTickSleeper()->addNotifier(function(){
 			$this->onWake();
 		});
 	}
@@ -115,13 +112,14 @@ class discordThread extends Thread{
 		unset($this->token);
 
 		$discord->on("ready", function($discord){
+			$notifier = $this->notifierEntry->createNotifier();
 			$this->started = true;
 			$this->logger->info("Bot is ready.");
 			// Listen for events here
 			$botUserId = $discord->user->id;
 			$receive_channelId = $this->receive_channelId;
 
-			$discord->on(Event::MESSAGE_CREATE, function(Message $message) use ($botUserId, $receive_channelId){
+			$discord->on(Event::MESSAGE_CREATE, function(Message $message) use ($botUserId, $receive_channelId, $notifier){
 				if($message->channel_id === $receive_channelId){
 					if($message->type !== Message::TYPE_NORMAL) return;//join message etc...
 					if($message->author->id === $botUserId) return;
@@ -130,7 +128,7 @@ class discordThread extends Thread{
 						'content' => $message->content
 					]);
 					/** @see onWake() */
-					$this->notifier->wakeupSleeper();
+					$notifier->wakeupSleeper();
 				}
 			});
 		});
@@ -174,7 +172,7 @@ class discordThread extends Thread{
 	 * @return void
 	 */
 	public function quit() : void{
-		Server::getInstance()->getTickSleeper()->removeNotifier($this->notifier);
+		Server::getInstance()->getTickSleeper()->removeNotifier($this->notifierEntry->getNotifierId());
 		parent::quit();
 	}
 
